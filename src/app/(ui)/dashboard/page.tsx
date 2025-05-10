@@ -1,8 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator"; // For the "or" divider
 
 export default function BusForm() {
     const router = useRouter();
@@ -11,6 +22,7 @@ export default function BusForm() {
         to: "",
         busNumber: "",
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -21,92 +33,123 @@ export default function BusForm() {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleRouteSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        if (!formData.from || !formData.to) {
+            toast.error("Please fill in both From and To fields.");
+            setIsSubmitting(false);
+            return;
+        }
         try {
-            localStorage.setItem("busFormData", JSON.stringify(formData));
-            toast.success("Data Submitted Successfully");
+            // Clear busNumber when submitting by route
+            const dataToStore = { from: formData.from, to: formData.to, busNumber: "" };
+            localStorage.setItem("busFormData", JSON.stringify(dataToStore));
+            toast.success("Searching by route...");
             router.push('/result');
         } catch (error) {
             console.error("Error storing data in localStorage:", error);
-            toast.error("Failed to save data. Please try again.");
+            toast.error("Failed to save route data. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleBusNumberSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        if (!formData.busNumber) {
+            toast.error("Please fill in the Bus Number field.");
+            setIsSubmitting(false);
             return;
+        }
+        try {
+            // Clear from and to when submitting by bus number
+            const dataToStore = { from: "", to: "", busNumber: formData.busNumber };
+            localStorage.setItem("busFormData", JSON.stringify(dataToStore));
+            toast.success("Searching by bus number...");
+            router.push('/result');
+        } catch (error) {
+            console.error("Error storing data in localStorage:", error);
+            toast.error("Failed to save bus number data. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
 
     return (
-        <div className="flex flex-wrap items-center justify-center min-h-screen bg-gray-900 p-4">
-            <div className="flex flex-wrap items-center space-y-4 justify-center max-w-md">
-                <h2 className="text-2xl bg-gray-800 p-2 rounded-lg shadow-lg w-full max-w-md font-semibold text-center text-gray-200 mb-2">
-                    Bus Form
-                </h2>
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md"
-                >
+        <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-md space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-xl">Search by Route</CardTitle>
+                        <CardDescription>Enter starting point and destination.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleRouteSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="from">From</Label>
+                                <Input
+                                    id="from"
+                                    name="from"
+                                    value={formData.from}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter starting location"
+                                    required
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="to">To</Label>
+                                <Input
+                                    id="to"
+                                    name="to"
+                                    value={formData.to}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter destination"
+                                    required
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <Button type="submit" className="w-full" disabled={isSubmitting}>
+                                {isSubmitting ? "Searching..." : "Search by Route"}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
 
+                <div className="flex items-center space-x-2">
+                    <Separator className="flex-grow" />
+                    <span className="text-xs text-muted-foreground">OR</span>
+                    <Separator className="flex-grow" />
+                </div>
 
-                    <label className="block text-gray-300 mb-2">
-                        From
-                        <input
-                            type="text"
-                            name="from"
-                            value={formData.from}
-                            onChange={handleInputChange}
-                            className="w-full p-2 mt-1 bg-gray-700 rounded-md text-gray-100 focus:ring-1 focus:ring-blue-500"
-                            placeholder="Enter starting location"
-                            required
-                        />
-                    </label>
-
-                    <label className="block text-gray-300 mb-2">
-                        To
-                        <input
-                            type="text"
-                            name="to"
-                            value={formData.to}
-                            onChange={handleInputChange}
-                            className="w-full p-2 mt-1 bg-gray-700 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter destination"
-                            required
-
-                        />
-                    </label>
-
-                    <button
-                        type="submit"
-                        className="w-full py-2 mt-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition duration-200"
-                    >
-                        Submit
-                    </button>
-                </form>
-                <div className="text-white font-bold"> - or -</div>
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md"
-                >
-                    <label className="block text-gray-300 mb-4">
-                        Bus Number
-                        <input
-                            type="text"
-                            name="busNumber"
-                            value={formData.busNumber}
-                            onChange={handleInputChange}
-                            className="w-full p-2 mt-1 bg-gray-700 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter bus number"
-                            required
-
-                        />
-                    </label>
-
-                    <button
-                        type="submit"
-                        className="w-full py-2 mt-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition duration-200"
-                    >
-                        Submit
-                    </button>
-                </form>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-xl">Search by Bus Number</CardTitle>
+                        <CardDescription>Enter the bus registration number.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleBusNumberSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="busNumber">Bus Number</Label>
+                                <Input
+                                    id="busNumber"
+                                    name="busNumber"
+                                    value={formData.busNumber}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., AB12CD3456"
+                                    required
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <Button type="submit" className="w-full" disabled={isSubmitting}>
+                                {isSubmitting ? "Searching..." : "Search by Bus Number"}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
