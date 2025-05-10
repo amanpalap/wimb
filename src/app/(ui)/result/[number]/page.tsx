@@ -2,7 +2,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { FaArrowRight, FaMapMarkerAlt, FaRegClock } from 'react-icons/fa'
+import { FaMapMarkerAlt, FaRegClock } from 'react-icons/fa'
 import {
     Card,
     CardContent,

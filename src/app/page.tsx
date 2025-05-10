@@ -1,25 +1,24 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import LoadMegaLoadinging from '../components/loading/MegaLoading';
+import LoadMegaLoading from '../components/loading/MegaLoading'; // Fixed typo
 import { useRouter } from 'next/navigation';
 
 const Page = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
+      router.push('/dashboard'); // Redirect after loading
     }, 2000);
-    () => clearTimeout(timer);
 
-    router.push('/dashboard')
-    return
-  }, []);
+    return () => clearTimeout(timer); // Proper cleanup
+  }, [router]);
 
   return (
     <div>
-      {isLoading && <LoadMegaLoadinging />}
+      {isLoading && <LoadMegaLoading />}
     </div>
   );
 };

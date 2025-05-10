@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 // Import the marker icon and shadow images
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -79,7 +79,7 @@ const MapComponent: FC<MapProps> = ({ users }) => {
                     icon={customIcon} // Use custom icon here
                 >
                     <Popup>
-                        {user.name}'s location<br />
+                        {user.name}&apos;s location<br />
                         Latitude: {user.lat}<br />
                         Longitude: {user.long}
                     </Popup>
